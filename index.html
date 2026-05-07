@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI買取マッチング・エージェント</title>
+  <style>
+    :root{
+      --ink:#273143;--blue:#4b8fe8;--sky:#eaf5ff;--yellow:#fff1b8;--pink:#ffe8ef;--mint:#e4f8ef;--line:#dce7f3;--paper:#fffdf7;--gray:#657286;
+      --shadow:0 16px 36px rgba(39,49,67,.12);--r:28px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;color:var(--ink);background:linear-gradient(180deg,#f7fbff,#fffdf7);line-height:1.65}.wrap{max-width:1160px;margin:auto;padding:0 28px}.hero{padding:58px 0 46px;background:radial-gradient(circle at 10% 10%,#e4f8ef 0 16%,transparent 17%),radial-gradient(circle at 90% 4%,#ffe8ef 0 16%,transparent 17%),#f7fbff}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center}.badge{display:inline-block;background:white;border:2px solid var(--ink);border-radius:999px;padding:7px 16px;font-weight:900;box-shadow:5px 5px 0 #cfe3ff}.title{font-size:clamp(36px,5vw,62px);line-height:1.08;letter-spacing:-.05em;margin:22px 0 18px;font-weight:950}.lead{font-size:20px;font-weight:700;color:#405069;margin:0 0 24px}.pill{display:inline-flex;background:var(--ink);color:white;border-radius:999px;padding:13px 22px;font-weight:900}.manga-card{position:relative;background:white;border:3px solid var(--ink);border-radius:34px;padding:24px;box-shadow:10px 10px 0 #cfe3ff}.phone{background:#f8fbff;border:8px solid var(--ink);border-radius:30px;padding:18px;min-height:460px}.bubble{max-width:86%;border:2px solid var(--ink);border-radius:22px;padding:12px 15px;margin:12px 0;font-weight:800;background:white;box-shadow:4px 4px 0 rgba(39,49,67,.12)}.bubble.user{margin-left:auto;background:var(--mint)}.bubble.ai{background:var(--yellow)}.burst{position:absolute;right:-18px;top:-20px;background:#ffef74;border:3px solid var(--ink);border-radius:50%;width:118px;height:118px;display:grid;place-items:center;text-align:center;font-weight:950;transform:rotate(9deg);box-shadow:6px 6px 0 rgba(39,49,67,.15)}section{padding:52px 0}.center{text-align:center;max-width:780px;margin:0 auto 30px}.center h2{font-size:clamp(28px,3.2vw,44px);line-height:1.22;margin:0 0 10px;letter-spacing:-.04em}.center p{margin:0;color:var(--gray);font-weight:700}.comic-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.panel{position:relative;background:white;border:3px solid var(--ink);border-radius:30px;padding:22px;min-height:250px;box-shadow:8px 8px 0 #dbeafe;overflow:hidden}.panel:nth-child(2n){box-shadow:8px 8px 0 #ffe0ea}.panel:nth-child(3n){box-shadow:8px 8px 0 #d7f5e8}.num{position:absolute;top:14px;right:16px;font-size:34px;font-weight:950;color:#d2deeb}.emoji{font-size:58px;margin:12px 0 10px}.panel h3{font-size:22px;line-height:1.3;margin:0 0 10px}.panel p{font-size:15px;color:#536277;margin:0;font-weight:700}.arrow{position:absolute;right:-18px;top:48%;background:var(--ink);color:white;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:950;z-index:2}.problem{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.small{background:var(--paper);border:3px solid var(--ink);border-radius:26px;padding:22px;box-shadow:6px 6px 0 #e8eef7}.small .emoji{font-size:42px;margin:0 0 8px}.small h3{margin:0 0 6px;font-size:20px}.small p{margin:0;color:var(--gray);font-weight:700}.demo{display:grid;grid-template-columns:1fr 1.1fr;gap:22px;align-items:stretch}.big{background:white;border:3px solid var(--ink);border-radius:32px;padding:28px;box-shadow:8px 8px 0 #cfe3ff}.quote{font-size:30px;font-weight:950;line-height:1.35;margin:0}.lead-card{background:#f8fbff;border:3px solid var(--ink);border-radius:28px;padding:22px}.row{display:grid;grid-template-columns:116px 1fr;border-bottom:2px dashed #cfdceb;padding:10px 0;font-weight:800}.row:last-child{border-bottom:0}.tag{display:inline-block;background:var(--yellow);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;font-weight:950}.footer{padding:50px 0 64px;text-align:center;background:#eef7ff}.footer h2{font-size:38px;margin:0 0 10px}.footer p{font-weight:800;color:#526176;margin:0 0 20px}@media(max-width:900px){.hero-grid,.demo{grid-template-columns:1fr}.comic-flow,.problem{grid-template-columns:1fr 1fr}.burst{right:12px}}@media(max-width:560px){.wrap{padding:0 18px}.comic-flow,.problem{grid-template-columns:1fr}.arrow{display:none}.panel{min-height:auto}.row{grid-template-columns:1fr;gap:2px}}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="badge">AI時代の買取入口</div>
+        <h1 class="title">売りたい人の<br>「これ、いくら？」を<br>買取店につなぐ。</h1>
+        <p class="lead">ChatGPT・Gemini・LINE AI で生まれる売却相談を、商談可能な買取リードへ。</p>
+        <div class="pill">中古車買取店向け AI Agent</div>
+      </div>
+      <div class="manga-card">
+        <div class="burst">査定予約<br>まで<br>自動案内</div>
+        <div class="phone">
+          <div class="bubble user">この古い車、売るならいくらくらい？</div>
+          <div class="bubble ai">車種・年式・走行距離を教えてください。</div>
+          <div class="bubble user">2019年 Alphard、7万kmです。</div>
+          <div class="bubble ai">対応可能な買取店に概算確認できます。</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="center">
+        <h2>いま起きている変化</h2>
+        <p>ユーザーは検索より先に、AIへ相談し始めます。</p>
+      </div>
+      <div class="problem">
+        <div class="small"><div class="emoji">💬</div><h3>相談はAIへ</h3><p>「車を売りたい」「相場を知りたい」がAIとの会話で始まる。</p></div>
+        <div class="small"><div class="emoji">📉</div><h3>情報はバラバラ</h3><p>車種・距離・写真・地域が揃わず、商談化しにくい。</p></div>
+        <div class="small"><div class="emoji">🏁</div><h3>早い店が勝つ</h3><p>良い車源ほど、早く自然に査定予約へ進めた店が強い。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#f7fbff">
+    <div class="wrap">
+      <div class="center">
+        <h2>ビジネスフロー</h2>
+        <p>ユーザーのAI相談から、現車査定まで。</p>
+      </div>
+      <div class="comic-flow">
+        <div class="panel"><div class="num">01</div><div class="emoji">👤💬</div><h3>ユーザーがChatGPTに相談</h3><p>「古い車を売りたい。いくらくらい？」</p><div class="arrow">→</div></div>
+        <div class="panel"><div class="num">02</div><div class="emoji">🤖📝</div><h3>ChatGPTが情報整理</h3><p>車種・年式・距離・修復歴・写真・所在地を確認。</p><div class="arrow">→</div></div>
+        <div class="panel"><div class="num">03</div><div class="emoji">📨🚗</div><h3>Agentが商戶へ共有</h3><p>整理済みリードを、相性の良い買取店へ送信。</p></div>
+        <div class="panel"><div class="num">04</div><div class="emoji">🏪💴</div><h3>商戶が概算报价</h3><p>買取店が価格帯・条件をAgentへ返答。</p><div class="arrow">→</div></div>
+        <div class="panel"><div class="num">05</div><div class="emoji">🤖✅</div><h3>ChatGPTがユーザーへ提示</h3><p>価格・条件・次の流れをわかりやすく返信。</p><div class="arrow">→</div></div>
+        <div class="panel"><div class="num">06</div><div class="emoji">📅🤝</div><h3>同意後、現車査定へ</h3><p>ユーザーがOKなら、商戶が直接連絡。日程調整へ。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap demo">
+      <div class="big">
+        <p class="quote">AIが聞いて、<br>Agentがつなぎ、<br>買取店が動く。</p>
+        <p style="font-weight:800;color:#657286;margin-top:18px">新しいC向けアプリを無理に広めるのではなく、AI相談の中にある「売りたい気持ち」を商談へ変えます。</p>
+      </div>
+      <div class="lead-card">
+        <h3 style="font-size:24px;margin:0 0 10px">商戶に届くリード例</h3>
+        <div class="row"><b>車両</b><span>2019 Toyota Alphard</span></div>
+        <div class="row"><b>状態</b><span>70,000km / 修復歴なし / 車検8ヶ月</span></div>
+        <div class="row"><b>所在地</b><span>東京都内</span></div>
+        <div class="row"><b>希望</b><span>出張査定・2週間以内に売却検討</span></div>
+        <div class="row"><b>優先度</b><span><span class="tag">高</span> 輸出需要あり</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#fffaf0">
+    <div class="wrap">
+      <div class="center"><h2>買取店へのメリット</h2></div>
+      <div class="problem">
+        <div class="small"><div class="emoji">🎯</div><h3>質の高いリード</h3><p>査定前に必要情報が揃っている。</p></div>
+        <div class="small"><div class="emoji">⏱️</div><h3>対応時間を短縮</h3><p>スタッフの聞き取り作業を減らす。</p></div>
+        <div class="small"><div class="emoji">🚀</div><h3>AI入口に先行対応</h3><p>将来の買取導線を早めに押さえる。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap">
+      <h2>AI買取マッチング・エージェント</h2>
+      <p>売却相談を、査定予約へ。</p>
+      <div class="pill">中古車買取店向け 提案資料</div>
+    </div>
+  </footer>
+</body>
+</html>
