@@ -1,0 +1,18 @@
+[
+  {
+    "id": "m-test-amano-tokyo",
+    "name": "天野自動車東京店",
+    "website_url": "",
+    "public_email": "smartgalilei@gmail.com",
+    "public_phone": "",
+    "line_url": "",
+    "contact_form_url": "",
+    "categories": ["ミニバン", "SUV", "セダン", "輸入車"],
+    "location": {
+      "prefectures": ["東京都", "神奈川県", "千葉県", "埼玉県"],
+      "city": "東京"
+    },
+    "notes": "Phase 1 test merchant. Use as a real merchant recipient for manual email outreach tests.",
+    "status": "active"
+  }
+]

@@ -735,8 +735,13 @@
       return PUBLIC_MERCHANT_DB
         .map((merchant) => {
           let score = 0;
-          if (merchant.prefectures.includes(lead.location.prefecture)) score += 45;
-          if (merchant.focus.includes(lead.vehicle.category)) score += 30;
+          const areaMatch = merchant.prefectures.includes(lead.location.prefecture);
+          const categoryMatch = merchant.focus.includes(lead.vehicle.category);
+          if (merchant.id === "m-test-amano-tokyo" && !areaMatch) {
+            return { ...merchant, score: 0 };
+          }
+          if (areaMatch) score += 45;
+          if (categoryMatch) score += 30;
           if (merchant.quick && lead.priority === "高") score += 15;
           if (lead.vehicle.mileage > 80000 && merchant.focus.includes("輸入車")) score += 5;
           if (merchant.channels.length >= 4) score += 5;

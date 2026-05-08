@@ -4,6 +4,7 @@ This repository contains two separate pages:
 
 - `index.html`: public product proposal page. Keep this as the stable external-facing link.
 - `outreach-console.html`: internal Phase 1 MVP console for lightweight merchant outreach testing.
+- `merchants.json`: first real merchant seed list for public outreach contact data.
 
 Do not replace the product proposal page with the MVP console. They are intentionally separate links.
 
