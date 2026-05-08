@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tradein MVP | Merchant Outreach Console</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --line: #d8deea;
+      --ink: #1e2a3b;
+      --sub: #5b677a;
+      --accent: #0b74de;
+      --good: #198754;
+      --warn: #c68008;
+      --bad: #b42318;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.45;
+    }
+
+    .app {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--sub);
+      font-size: 13px;
+      margin: 4px 0 0;
+    }
+
+    .band {
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .span-5 { grid-column: span 5; }
+    .span-7 { grid-column: span 7; }
+    .span-6 { grid-column: span 6; }
+    .span-12 { grid-column: span 12; }
+
+    .grid-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #c6cedd;
+      padding: 8px 9px;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 7px 10px;
+      cursor: pointer;
+      background: #e8edf7;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    button.ghost {
+      background: white;
+      border-color: var(--line);
+    }
+
+    button.warn {
+      background: #fee7e7;
+      color: var(--bad);
+      border-color: #f3c2c2;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 124px 1fr;
+      gap: 6px;
+      padding: 4px 0;
+      border-bottom: 1px solid #eef2f8;
+      font-size: 13px;
+    }
+
+    .kv:last-child {
+      border-bottom: 0;
+    }
+
+    .kv b {
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    .list {
+      border: 1px solid var(--line);
+      overflow: auto;
+      max-height: 260px;
+    }
+
+    .list table,
+    .queue table,
+    .db table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 12px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #edf1f8;
+      text-align: left;
+      vertical-align: top;
+      padding: 7px 8px;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--sub);
+      background: #f8fafd;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td.wrap {
+      white-space: normal;
+      max-width: 240px;
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 11px;
+      line-height: 1.55;
+      background: #edf3ff;
+      color: #264a8c;
+    }
+
+    .status-draft { background: #eff3f8; color: #4c5a6b; }
+    .status-sent { background: #fff4d8; color: #8a5b00; }
+    .status-responded { background: #e8f8ee; color: #17663f; }
+
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .channel {
+      border: 1px solid var(--line);
+      padding: 8px;
+      min-width: 0;
+      background: #fbfcff;
+    }
+
+    .channel h3 {
+      margin: 0 0 6px;
+      font-size: 12px;
+    }
+
+    .channel pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-size: 11px;
+      color: #2f3b4c;
+      min-height: 116px;
+    }
+
+    .queue {
+      border: 1px solid var(--line);
+      overflow: auto;
+      max-height: 380px;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .inline-actions button {
+      padding: 4px 6px;
+      font-size: 11px;
+      border-radius: 5px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      padding: 10px;
+      background: #fbfdff;
+    }
+
+    .metric .label {
+      color: var(--sub);
+      font-size: 12px;
+    }
+
+    .metric .value {
+      font-size: 22px;
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    .feedback-notes {
+      border: 1px solid var(--line);
+      max-height: 180px;
+      overflow: auto;
+    }
+
+    .feedback-row {
+      padding: 8px 10px;
+      border-bottom: 1px solid #edf1f8;
+      font-size: 12px;
+    }
+
+    .feedback-row:last-child {
+      border-bottom: 0;
+    }
+
+    .tiny {
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .no-data {
+      font-size: 12px;
+      color: var(--sub);
+      padding: 8px 0;
+    }
+
+    @media (max-width: 1120px) {
+      .span-5, .span-7, .span-6 {
+        grid-column: span 12;
+      }
+
+      .channel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .grid-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .channel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1 class="title">Tradein Phase 1 Outreach Console (MVP)</h1>
+        <p class="muted">中古車の下取りリード受付・商戶マッチング・手動送信運用を1画面で実行</p>
+      </div>
+      <div class="actions">
+        <span class="tiny" id="persistStatus">localStorage: 保存済み</span>
+        <button class="warn" id="resetData">データを初期化</button>
+      </div>
+    </header>
+
+    <section class="band">
+      <section class="panel span-5">
+        <h2>1) リード受付</h2>
+        <form id="leadForm">
+          <div class="grid-fields">
+            <div class="field">
+              <label for="customerName">ユーザー名</label>
+              <input id="customerName" name="customerName" required placeholder="例: 佐藤 綾" />
+            </div>
+            <div class="field">
+              <label for="customerContact">連絡先（メール/電話/LINE ID）</label>
+              <input id="customerContact" name="customerContact" required placeholder="例: [email protected]" />
+            </div>
+            <div class="field">
+              <label for="preferredContact">ユーザー希望連絡</label>
+              <select id="preferredContact" name="preferredContact">
+                <option value="line">LINE</option>
+                <option value="email">Email</option>
+                <option value="phone">電話</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="prefecture">都道府県</label>
+              <select id="prefecture" name="prefecture">
+                <option>東京都</option><option>神奈川県</option><option>千葉県</option><option>埼玉県</option>
+                <option>大阪府</option><option>愛知県</option><option>福岡県</option><option>北海道</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="city">市区町村</label>
+              <input id="city" name="city" placeholder="例: 世田谷区" />
+            </div>
+            <div class="field">
+              <label for="sellBy">売却希望時期</label>
+              <select id="sellBy" name="sellBy">
+                <option value="1週間以内">1週間以内</option>
+                <option value="2週間以内">2週間以内</option>
+                <option value="1ヶ月以内">1ヶ月以内</option>
+                <option value="未定">未定</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="make">メーカー</label>
+              <input id="make" name="make" required placeholder="例: Toyota" />
+            </div>
+            <div class="field">
+              <label for="model">車種</label>
+              <input id="model" name="model" required placeholder="例: Alphard" />
+            </div>
+            <div class="field">
+              <label for="year">年式</label>
+              <input id="year" name="year" type="number" min="1990" max="2026" required value="2019" />
+            </div>
+            <div class="field">
+              <label for="mileage">走行距離(km)</label>
+              <input id="mileage" name="mileage" type="number" min="0" required value="70000" />
+            </div>
+            <div class="field">
+              <label for="category">車種カテゴリ</label>
+              <select id="category" name="category">
+                <option value="ミニバン">ミニバン</option>
+                <option value="SUV">SUV</option>
+                <option value="セダン">セダン</option>
+                <option value="軽自動車">軽自動車</option>
+                <option value="輸入車">輸入車</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="condition">車両状態</label>
+              <select id="condition" name="condition">
+                <option value="良好">良好</option>
+                <option value="通常">通常</option>
+                <option value="要整備">要整備</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="accident">修復歴</label>
+              <select id="accident" name="accident">
+                <option value="なし">なし</option>
+                <option value="軽微あり">軽微あり</option>
+                <option value="あり">あり</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="desiredPrice">希望価格(万円)</label>
+              <input id="desiredPrice" name="desiredPrice" type="number" min="0" step="1" placeholder="例: 250" />
+            </div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label for="notes">補足メモ</label>
+            <textarea id="notes" name="notes" placeholder="例: 出張査定希望、土日対応可"></textarea>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">リード登録して商戶候補を生成</button>
+            <span class="tiny">登録時に自動でアウトリーチ下書きをキュー作成します。</span>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel span-7">
+        <h2>2) 構造化リード + 保存済みリード</h2>
+        <div id="leadStructured" class="no-data">まだリードがありません。左のフォームから登録してください。</div>
+        <div class="actions" style="margin-top:10px">
+          <label for="leadFilter" class="tiny">表示:</label>
+          <select id="leadFilter">
+            <option value="all">全件</option>
+            <option value="high">優先度 高のみ</option>
+          </select>
+        </div>
+        <div class="list" id="leadListWrap"></div>
+      </section>
+    </section>
+
+    <section class="band">
+      <section class="panel span-6">
+        <h2>3) 商戶マッチング + チャネル文面生成 (日本語)</h2>
+        <div id="matchList" class="no-data">選択中のリードがありません。</div>
+        <div class="channel-grid" id="channelDrafts"></div>
+      </section>
+
+      <section class="panel span-6">
+        <h2>4) 手動アウトリーチキュー</h2>
+        <div class="actions">
+          <label for="queueFilter" class="tiny">絞り込み:</label>
+          <select id="queueFilter">
+            <option value="open">未返信（draft + sent）</option>
+            <option value="all">全件</option>
+            <option value="draft">draft</option>
+            <option value="sent">sent</option>
+            <option value="responded">responded</option>
+          </select>
+          <label for="queueLeadFilter" class="tiny">対象:</label>
+          <select id="queueLeadFilter">
+            <option value="all">全リード</option>
+          </select>
+        </div>
+        <div class="queue" id="queueWrap"></div>
+        <p class="tiny">送信は実運用連携なし。`コピー` と `リンク` から担当者が手動送信する前提です。</p>
+      </section>
+    </section>
+
+    <section class="band">
+      <section class="panel span-6">
+        <h2>5) ユーザーフィードバックサマリー</h2>
+        <div class="summary" id="summaryCards"></div>
+        <div class="feedback-notes" id="feedbackList"></div>
+      </section>
+      <section class="panel span-6 db">
+        <h2>公開連絡先DB（モック）</h2>
+        <div id="merchantDb"></div>
+      </section>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "tradein_mvp_state_v1";
+
+    const PUBLIC_MERCHANT_DB = [
+      {
+        id: "m-test-amano-tokyo",
+        name: "天野自動車東京店",
+        prefectures: ["東京都", "神奈川県", "千葉県", "埼玉県"],
+        focus: ["ミニバン", "SUV", "セダン", "輸入車"],
+        channels: ["email", "manual"],
+        quick: true,
+        email: "smartgalilei@gmail.com",
+        phone: "",
+        sms: "",
+        contactForm: "",
+        lineId: ""
+      },
+      {
+        id: "m-tokyo-01",
+        name: "東京クイック買取",
+        prefectures: ["東京都", "神奈川県", "千葉県", "埼玉県"],
+        focus: ["ミニバン", "SUV"],
+        channels: ["email", "contact_form", "line"],
+        quick: true,
+        email: "[email protected]",
+        phone: "+81300010001",
+        sms: "+819011110001",
+        contactForm: "https://example.jp/tokyo-quick/contact",
+        lineId: "@tokyoquick"
+      },
+      {
+        id: "m-osaka-02",
+        name: "関西オートリンク",
+        prefectures: ["大阪府", "京都府", "兵庫県", "奈良県"],
+        focus: ["軽自動車", "セダン"],
+        channels: ["email", "sms", "manual"],
+        quick: false,
+        email: "[email protected]",
+        phone: "+81600020002",
+        sms: "+819022220002",
+        contactForm: "",
+        lineId: "@kansai_auto"
+      },
+      {
+        id: "m-nagoya-03",
+        name: "中部輸出査定センター",
+        prefectures: ["愛知県", "岐阜県", "三重県", "静岡県"],
+        focus: ["輸入車", "SUV", "ミニバン"],
+        channels: ["email", "contact_form", "manual"],
+        quick: true,
+        email: "[email protected]",
+        phone: "+815200030003",
+        sms: "+819033330003",
+        contactForm: "https://example.jp/chubu-export/inquiry",
+        lineId: "@chubu_export"
+      },
+      {
+        id: "m-fukuoka-04",
+        name: "九州スピード査定",
+        prefectures: ["福岡県", "熊本県", "佐賀県", "大分県"],
+        focus: ["ミニバン", "軽自動車"],
+        channels: ["sms", "line", "manual"],
+        quick: true,
+        email: "[email protected]",
+        phone: "+819200040004",
+        sms: "+819044440004",
+        contactForm: "",
+        lineId: "@kyushu_speed"
+      },
+      {
+        id: "m-wide-05",
+        name: "全国バイヤーネット",
+        prefectures: ["東京都", "大阪府", "愛知県", "福岡県", "北海道", "神奈川県"],
+        focus: ["SUV", "輸入車", "セダン", "ミニバン", "軽自動車"],
+        channels: ["email", "sms", "contact_form", "line", "manual"],
+        quick: true,
+        email: "[email protected]",
+        phone: "+81300550005",
+        sms: "+819055550005",
+        contactForm: "https://example.jp/buyer-net/form",
+        lineId: "@buyer_net"
+      }
+    ];
+
+    const CHANNELS = ["email", "sms", "contact_form", "line", "manual"];
+
+    let state = loadState();
+
+    const leadForm = document.getElementById("leadForm");
+    const leadStructured = document.getElementById("leadStructured");
+    const leadListWrap = document.getElementById("leadListWrap");
+    const leadFilter = document.getElementById("leadFilter");
+    const queueFilter = document.getElementById("queueFilter");
+    const queueLeadFilter = document.getElementById("queueLeadFilter");
+    const queueWrap = document.getElementById("queueWrap");
+    const summaryCards = document.getElementById("summaryCards");
+    const feedbackList = document.getElementById("feedbackList");
+    const matchList = document.getElementById("matchList");
+    const channelDrafts = document.getElementById("channelDrafts");
+    const persistStatus = document.getElementById("persistStatus");
+    const merchantDb = document.getElementById("merchantDb");
+    const resetDataBtn = document.getElementById("resetData");
+
+    leadForm.addEventListener("submit", onLeadSubmit);
+    leadFilter.addEventListener("change", render);
+    queueFilter.addEventListener("change", renderQueue);
+    queueLeadFilter.addEventListener("change", renderQueue);
+    resetDataBtn.addEventListener("click", resetState);
+    leadListWrap.addEventListener("click", onLeadListClick);
+    queueWrap.addEventListener("click", onQueueActionClick);
+    queueWrap.addEventListener("input", onQueueInput);
+
+    render();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return {
+            leads: [],
+            queue: [],
+            selectedLeadId: null
+          };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+          leads: Array.isArray(parsed.leads) ? parsed.leads : [],
+          queue: Array.isArray(parsed.queue) ? parsed.queue : [],
+          selectedLeadId: parsed.selectedLeadId || null
+        };
+      } catch (_err) {
+        return {
+          leads: [],
+          queue: [],
+          selectedLeadId: null
+        };
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        persistStatus.textContent = "localStorage: " + new Date().toLocaleString("ja-JP") + " に保存";
+      } catch (_err) {
+        persistStatus.textContent = "保存不可: このブラウザでは一時メモリで動作中";
+      }
+    }
+
+    function resetState() {
+      const ok = window.confirm("保存済みリードとキューを削除して初期化しますか？");
+      if (!ok) return;
+      state = { leads: [], queue: [], selectedLeadId: null };
+      saveState();
+      render();
+    }
+
+    function onLeadSubmit(event) {
+      event.preventDefault();
+      const fd = new FormData(leadForm);
+
+      const lead = {
+        id: uid("lead"),
+        createdAt: new Date().toISOString(),
+        customer: {
+          name: String(fd.get("customerName") || "").trim(),
+          contact: String(fd.get("customerContact") || "").trim(),
+          preferredContact: String(fd.get("preferredContact") || "line")
+        },
+        location: {
+          prefecture: String(fd.get("prefecture") || "").trim(),
+          city: String(fd.get("city") || "").trim()
+        },
+        vehicle: {
+          make: String(fd.get("make") || "").trim(),
+          model: String(fd.get("model") || "").trim(),
+          year: toInt(fd.get("year")),
+          mileage: toInt(fd.get("mileage")),
+          category: String(fd.get("category") || "").trim(),
+          condition: String(fd.get("condition") || "").trim(),
+          accident: String(fd.get("accident") || "").trim()
+        },
+        desiredPrice: toInt(fd.get("desiredPrice")),
+        sellBy: String(fd.get("sellBy") || "未定"),
+        notes: String(fd.get("notes") || "").trim(),
+        priority: "中",
+        status: "new"
+      };
+
+      lead.priority = calculatePriority(lead);
+
+      state.leads.unshift(lead);
+      state.selectedLeadId = lead.id;
+      createOutreachQueueForLead(lead);
+      saveState();
+      persistStatus.textContent = "リード登録完了: " + lead.id;
+      render();
+      leadForm.reset();
+      document.getElementById("year").value = "2019";
+      document.getElementById("mileage").value = "70000";
+    }
+
+    function calculatePriority(lead) {
+      let score = 0;
+      const timeline = lead.sellBy;
+      if (timeline === "1週間以内") score += 4;
+      else if (timeline === "2週間以内") score += 3;
+      else if (timeline === "1ヶ月以内") score += 2;
+      else score += 1;
+
+      if (lead.vehicle.condition === "良好") score += 3;
+      else if (lead.vehicle.condition === "通常") score += 2;
+      else score += 1;
+
+      if (lead.vehicle.accident === "なし") score += 2;
+      if (lead.vehicle.mileage <= 60000) score += 2;
+      else if (lead.vehicle.mileage <= 90000) score += 1;
+
+      if (score >= 9) return "高";
+      if (score >= 6) return "中";
+      return "低";
+    }
+
+    function matchMerchants(lead) {
+      return PUBLIC_MERCHANT_DB
+        .map((merchant) => {
+          let score = 0;
+          if (merchant.prefectures.includes(lead.location.prefecture)) score += 45;
+          if (merchant.focus.includes(lead.vehicle.category)) score += 30;
+          if (merchant.quick && lead.priority === "高") score += 15;
+          if (lead.vehicle.mileage > 80000 && merchant.focus.includes("輸入車")) score += 5;
+          if (merchant.channels.length >= 4) score += 5;
+          if (merchant.id === "m-test-amano-tokyo") score += 10;
+          return { ...merchant, score };
+        })
+        .filter((m) => m.score > 0)
+        .sort((a, b) => b.score - a.score);
+    }
+
+    function createOutreachQueueForLead(lead) {
+      const matches = matchMerchants(lead).slice(0, 4);
+      matches.forEach((merchant) => {
+        const targetChannels = merchant.channels.length ? merchant.channels : ["manual"];
+        targetChannels.forEach((channel) => {
+          const message = buildMessage(lead, merchant, channel);
+          state.queue.unshift({
+            id: uid("q"),
+            leadId: lead.id,
+            merchantId: merchant.id,
+            merchantName: merchant.name,
+            channel,
+            message,
+            contact: contactForChannel(merchant, channel),
+            link: buildOutreachLink(merchant, channel, message),
+            status: "draft",
+            quoteAmount: "",
+            feedbackMemo: "",
+            createdAt: new Date().toISOString(),
+            sentAt: "",
+            respondedAt: ""
+          });
+        });
+      });
+    }
+
+    function buildMessage(lead, merchant, channel) {
+      const label = channelLabel(channel);
+      const priceText = lead.desiredPrice ? ("希望価格: " + lead.desiredPrice + "万円") : "希望価格: 未設定";
+      return [
+        merchant.name + " 御中",
+        "",
+        "Tradein事務局です。下記の中古車売却相談について、概算査定可否をご確認ください。",
+        "",
+        "【リードID】" + lead.id,
+        "【ユーザー】" + lead.customer.name + " / 希望連絡: " + lead.customer.preferredContact,
+        "【車両】" + lead.vehicle.year + "年 " + lead.vehicle.make + " " + lead.vehicle.model + " (" + lead.vehicle.category + ")",
+        "【状態】走行 " + lead.vehicle.mileage + "km / 修復歴 " + lead.vehicle.accident + " / " + lead.vehicle.condition,
+        "【地域】" + lead.location.prefecture + (lead.location.city ? (" " + lead.location.city) : ""),
+        "【売却時期】" + lead.sellBy,
+        "【優先度】" + lead.priority,
+        "【" + priceText + "】",
+        lead.notes ? ("【補足】" + lead.notes) : "",
+        "",
+        "この連絡は Phase 1 の手動運用です。返信は本メッセージへの返答または担当チャネルでお願いします。",
+        "送信チャネル: " + label
+      ].filter(Boolean).join("\n");
+    }
+
+    function buildOutreachLink(merchant, channel, message) {
+      const encodedBody = encodeURIComponent(message);
+      const encodedSubject = encodeURIComponent("中古車査定相談の共有 (Tradein Phase1)");
+
+      if (channel === "email" && merchant.email) {
+        return "mailto:" + merchant.email + "?subject=" + encodedSubject + "&body=" + encodedBody;
+      }
+      if (channel === "sms" && merchant.sms) {
+        return "sms:" + merchant.sms + "?body=" + encodedBody;
+      }
+      if (channel === "contact_form" && merchant.contactForm) {
+        return merchant.contactForm;
+      }
+      if (channel === "line" && merchant.lineId) {
+        const lineId = encodeURIComponent(merchant.lineId);
+        return "https://line.me/R/oaMessage/" + lineId + "/?" + encodedBody;
+      }
+      return "";
+    }
+
+    function contactForChannel(merchant, channel) {
+      if (channel === "email") return merchant.email || "-";
+      if (channel === "sms") return merchant.sms || merchant.phone || "-";
+      if (channel === "contact_form") return merchant.contactForm || "-";
+      if (channel === "line") return merchant.lineId || "-";
+      return "担当者が手動対応";
+    }
+
+    function onLeadListClick(event) {
+      const button = event.target.closest("[data-lead-select]");
+      if (!button) return;
+      const leadId = button.getAttribute("data-lead-select");
+      state.selectedLeadId = leadId;
+      saveState();
+      render();
+    }
+
+    function onQueueActionClick(event) {
+      const button = event.target.closest("[data-queue-action]");
+      if (!button) return;
+
+      const action = button.getAttribute("data-queue-action");
+      const itemId = button.getAttribute("data-id");
+      const item = state.queue.find((q) => q.id === itemId);
+      if (!item) return;
+
+      if (action === "copy") {
+        copyText(item.message);
+      } else if (action === "open") {
+        if (item.link) window.open(item.link, "_blank", "noopener,noreferrer");
+      } else if (action === "sent") {
+        item.status = "sent";
+        item.sentAt = new Date().toISOString();
+      } else if (action === "responded") {
+        item.status = "responded";
+        item.respondedAt = new Date().toISOString();
+      }
+
+      saveState();
+      renderQueue();
+      renderSummary();
+    }
+
+    function onQueueInput(event) {
+      const input = event.target;
+      const itemId = input.getAttribute("data-id");
+      const field = input.getAttribute("data-field");
+      if (!itemId || !field) return;
+
+      const item = state.queue.find((q) => q.id === itemId);
+      if (!item) return;
+
+      if (field === "quoteAmount") {
+        item.quoteAmount = input.value;
+      } else if (field === "feedbackMemo") {
+        item.feedbackMemo = input.value;
+      }
+      saveState();
+      renderSummary();
+    }
+
+    function render() {
+      if (!state.selectedLeadId && state.leads.length) {
+        state.selectedLeadId = state.leads[0].id;
+      }
+      renderLeadStructured();
+      renderLeadList();
+      renderMatchesAndDrafts();
+      renderQueueLeadFilter();
+      renderQueue();
+      renderSummary();
+      renderMerchantDb();
+    }
+
+    function getSelectedLead() {
+      return state.leads.find((l) => l.id === state.selectedLeadId) || null;
+    }
+
+    function renderLeadStructured() {
+      const lead = getSelectedLead();
+      if (!lead) {
+        leadStructured.innerHTML = '<div class="no-data">まだリードがありません。左のフォームから登録してください。</div>';
+        return;
+      }
+
+      leadStructured.innerHTML = [
+        '<div class="kv"><b>Lead ID</b><span>' + lead.id + "</span></div>",
+        '<div class="kv"><b>受付日時</b><span>' + formatDate(lead.createdAt) + "</span></div>",
+        '<div class="kv"><b>ユーザー</b><span>' + escapeHtml(lead.customer.name) + " / " + escapeHtml(lead.customer.contact) + "</span></div>",
+        '<div class="kv"><b>希望連絡</b><span>' + escapeHtml(lead.customer.preferredContact) + "</span></div>",
+        '<div class="kv"><b>車両</b><span>' + lead.vehicle.year + "年 " + escapeHtml(lead.vehicle.make) + " " + escapeHtml(lead.vehicle.model) + " (" + escapeHtml(lead.vehicle.category) + ")" + "</span></div>",
+        '<div class="kv"><b>状態</b><span>' + lead.vehicle.mileage + "km / 修復歴 " + escapeHtml(lead.vehicle.accident) + " / " + escapeHtml(lead.vehicle.condition) + "</span></div>",
+        '<div class="kv"><b>所在地</b><span>' + escapeHtml(lead.location.prefecture) + (lead.location.city ? (" " + escapeHtml(lead.location.city)) : "") + "</span></div>",
+        '<div class="kv"><b>売却時期</b><span>' + escapeHtml(lead.sellBy) + "</span></div>",
+        '<div class="kv"><b>希望価格</b><span>' + (lead.desiredPrice ? (lead.desiredPrice + "万円") : "未設定") + "</span></div>",
+        '<div class="kv"><b>優先度</b><span><span class="badge">' + lead.priority + "</span></span></div>",
+        '<div class="kv"><b>メモ</b><span>' + (lead.notes ? escapeHtml(lead.notes) : "なし") + "</span></div>"
+      ].join("");
+    }
+
+    function renderLeadList() {
+      const filter = leadFilter.value;
+      let leads = state.leads.slice();
+      if (filter === "high") {
+        leads = leads.filter((l) => l.priority === "高");
+      }
+
+      if (!leads.length) {
+        leadListWrap.innerHTML = '<div class="no-data" style="padding:10px">条件に合うリードがありません。</div>';
+        return;
+      }
+
+      const rows = leads.map((lead) => {
+        const isSelected = lead.id === state.selectedLeadId;
+        return (
+          "<tr>" +
+          "<td>" + lead.id + "</td>" +
+          "<td>" + escapeHtml(lead.customer.name) + "</td>" +
+          "<td>" + escapeHtml(lead.vehicle.make + " " + lead.vehicle.model) + "</td>" +
+          "<td>" + escapeHtml(lead.location.prefecture) + "</td>" +
+          '<td><span class="badge">' + lead.priority + "</span></td>" +
+          "<td>" + formatDate(lead.createdAt) + "</td>" +
+          '<td><button class="' + (isSelected ? "primary" : "ghost") + '" data-lead-select="' + lead.id + '">' + (isSelected ? "選択中" : "選択") + "</button></td>" +
+          "</tr>"
+        );
+      }).join("");
+
+      leadListWrap.innerHTML =
+        "<table><thead><tr>" +
+        "<th>Lead</th><th>ユーザー</th><th>車両</th><th>地域</th><th>優先度</th><th>受付</th><th>操作</th>" +
+        "</tr></thead><tbody>" + rows + "</tbody></table>";
+    }
+
+    function renderMatchesAndDrafts() {
+      const lead = getSelectedLead();
+      if (!lead) {
+        matchList.innerHTML = '<div class="no-data">選択中のリードがありません。</div>';
+        channelDrafts.innerHTML = "";
+        return;
+      }
+
+      const matches = matchMerchants(lead).slice(0, 5);
+      if (!matches.length) {
+        matchList.innerHTML = '<div class="no-data">マッチ対象の商戶がありません。</div>';
+      } else {
+        const listHtml = matches.map((m, idx) => {
+          return (
+            '<div class="kv">' +
+            "<b>#" + (idx + 1) + " " + escapeHtml(m.name) + "</b>" +
+            "<span>スコア " + m.score + " / 対応: " + m.channels.map(channelLabel).join(", ") + " / 重点: " + m.focus.join(", ") + "</span>" +
+            "</div>"
+          );
+        }).join("");
+        matchList.innerHTML = listHtml;
+      }
+
+      const primaryMerchant = matches[0] || PUBLIC_MERCHANT_DB[0];
+      channelDrafts.innerHTML = CHANNELS.map((channel) => {
+        const draft = buildMessage(lead, primaryMerchant, channel);
+        return (
+          '<article class="channel">' +
+          "<h3>" + channelLabel(channel) + "</h3>" +
+          "<pre>" + escapeHtml(draft) + "</pre>" +
+          '<div class="actions"><button class="ghost" data-copy-preview="' + encodeURIComponent(draft) + '">コピー</button></div>' +
+          "</article>"
+        );
+      }).join("");
+
+      channelDrafts.querySelectorAll("[data-copy-preview]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const text = decodeURIComponent(button.getAttribute("data-copy-preview"));
+          copyText(text);
+        });
+      });
+    }
+
+    function renderQueueLeadFilter() {
+      const current = queueLeadFilter.value;
+      const options = ['<option value="all">全リード</option>']
+        .concat(
+          state.leads.map((lead) => {
+            return '<option value="' + lead.id + '">' + lead.id + " | " + escapeHtml(lead.customer.name) + "</option>";
+          })
+        );
+      queueLeadFilter.innerHTML = options.join("");
+      if (current && Array.from(queueLeadFilter.options).some((o) => o.value === current)) {
+        queueLeadFilter.value = current;
+      }
+    }
+
+    function renderQueue() {
+      const statusFilter = queueFilter.value;
+      const leadFilterValue = queueLeadFilter.value || "all";
+      let rows = state.queue.slice();
+
+      if (statusFilter === "open") {
+        rows = rows.filter((q) => q.status === "draft" || q.status === "sent");
+      } else if (statusFilter !== "all") {
+        rows = rows.filter((q) => q.status === statusFilter);
+      }
+
+      if (leadFilterValue !== "all") {
+        rows = rows.filter((q) => q.leadId === leadFilterValue);
+      }
+
+      if (!rows.length) {
+        queueWrap.innerHTML = '<div class="no-data" style="padding:10px">該当キューがありません。</div>';
+        return;
+      }
+
+      const html = rows.map((item) => {
+        const statusClass = "status-" + item.status;
+        return (
+          "<tr>" +
+          "<td>" + item.leadId + "</td>" +
+          "<td>" + escapeHtml(item.merchantName) + "</td>" +
+          "<td>" + channelLabel(item.channel) + "</td>" +
+          '<td class="wrap">' + escapeHtml(item.contact) + "</td>" +
+          '<td><span class="badge ' + statusClass + '">' + item.status + "</span></td>" +
+          '<td><input type="number" min="0" step="1" value="' + escapeHtml(item.quoteAmount) + '" data-id="' + item.id + '" data-field="quoteAmount" style="width:82px" /></td>' +
+          '<td><input value="' + escapeHtml(item.feedbackMemo) + '" data-id="' + item.id + '" data-field="feedbackMemo" placeholder="反応メモ" style="width:124px" /></td>' +
+          '<td class="inline-actions">' +
+          '<button class="ghost" data-queue-action="copy" data-id="' + item.id + '">コピー</button>' +
+          '<button class="ghost" data-queue-action="open" data-id="' + item.id + '"' + (item.link ? "" : " disabled") + '>リンク</button>' +
+          '<button class="ghost" data-queue-action="sent" data-id="' + item.id + '">送信済</button>' +
+          '<button class="ghost" data-queue-action="responded" data-id="' + item.id + '">返信あり</button>' +
+          "</td>" +
+          "</tr>"
+        );
+      }).join("");
+
+      queueWrap.innerHTML =
+        "<table><thead><tr>" +
+        "<th>Lead</th><th>商戶</th><th>チャネル</th><th>連絡先</th><th>状態</th><th>見積(万円)</th><th>メモ</th><th>操作</th>" +
+        "</tr></thead><tbody>" + html + "</tbody></table>";
+    }
+
+    function renderSummary() {
+      const totalLeads = state.leads.length;
+      const totalQueue = state.queue.length;
+      const sent = state.queue.filter((q) => q.status === "sent" || q.status === "responded").length;
+      const respondedItems = state.queue.filter((q) => q.status === "responded");
+      const responded = respondedItems.length;
+      const responseRate = sent ? Math.round((responded / sent) * 100) : 0;
+      const quotes = respondedItems
+        .map((q) => Number(q.quoteAmount))
+        .filter((v) => Number.isFinite(v) && v > 0);
+      const avgQuote = quotes.length ? Math.round(quotes.reduce((a, b) => a + b, 0) / quotes.length) : 0;
+
+      summaryCards.innerHTML = [
+        metricCard("リード件数", String(totalLeads)),
+        metricCard("キュー総数", String(totalQueue)),
+        metricCard("返信率", responseRate + "%"),
+        metricCard("平均見積", avgQuote ? (avgQuote + "万円") : "-")
+      ].join("");
+
+      if (!respondedItems.length) {
+        feedbackList.innerHTML = '<div class="no-data" style="padding:10px">返信ありに更新された商戶がまだありません。</div>';
+        return;
+      }
+
+      const lines = respondedItems
+        .slice()
+        .sort((a, b) => new Date(b.respondedAt) - new Date(a.respondedAt))
+        .map((item) => {
+          const quoteText = item.quoteAmount ? (item.quoteAmount + "万円") : "見積未入力";
+          const memoText = item.feedbackMemo ? (" / " + escapeHtml(item.feedbackMemo)) : "";
+          return (
+            '<div class="feedback-row">' +
+            "<b>" + item.leadId + "</b> - " + escapeHtml(item.merchantName) +
+            " (" + channelLabel(item.channel) + ") / " + quoteText +
+            memoText +
+            '<div class="tiny">返信日時: ' + formatDate(item.respondedAt || item.createdAt) + "</div>" +
+            "</div>"
+          );
+        });
+      feedbackList.innerHTML = lines.join("");
+    }
+
+    function renderMerchantDb() {
+      const rows = PUBLIC_MERCHANT_DB.map((m) => {
+        return (
+          "<tr>" +
+          "<td>" + escapeHtml(m.name) + "</td>" +
+          '<td class="wrap">' + escapeHtml(m.prefectures.join(", ")) + "</td>" +
+          '<td class="wrap">' + escapeHtml(m.focus.join(", ")) + "</td>" +
+          '<td class="wrap">' + escapeHtml(m.channels.map(channelLabel).join(", ")) + "</td>" +
+          '<td class="wrap">' + escapeHtml(m.email || "-") + "<br>" + escapeHtml(m.sms || "-") + "<br>" + escapeHtml(m.lineId || "-") + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+
+      merchantDb.innerHTML =
+        "<table><thead><tr>" +
+        "<th>商戶名</th><th>対応エリア</th><th>重点カテゴリ</th><th>対応チャネル</th><th>公開連絡先</th>" +
+        "</tr></thead><tbody>" + rows + "</tbody></table>";
+    }
+
+    function metricCard(label, value) {
+      return '<article class="metric"><div class="label">' + label + '</div><div class="value">' + value + "</div></article>";
+    }
+
+    function channelLabel(channel) {
+      if (channel === "email") return "Email";
+      if (channel === "sms") return "SMS";
+      if (channel === "contact_form") return "Contact Form";
+      if (channel === "line") return "LINE";
+      return "Manual";
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          persistStatus.textContent = "クリップボードへコピーしました";
+        }).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const temp = document.createElement("textarea");
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      temp.remove();
+      persistStatus.textContent = "クリップボードへコピーしました";
+    }
+
+    function formatDate(value) {
+      if (!value) return "-";
+      return new Date(value).toLocaleString("ja-JP");
+    }
+
+    function toInt(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? Math.round(n) : 0;
+    }
+
+    function uid(prefix) {
+      return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+  </script>
+</body>
+</html>
