@@ -1,95 +1,142 @@
 # Tradein
 
-This repository contains two separate pages:
+Tradein is a single-merchant MVP for turning used-car sell intent inside ChatGPT into a structured purchase inquiry, with two human approval gates:
 
-- `index.html`: public product proposal page. Keep this as the stable external-facing link.
-- `outreach-console.html`: internal Phase 1 MVP console for lightweight merchant outreach testing.
-- `merchants.json`: first real merchant seed list for public outreach contact data.
+1. Admin approval before sending the lead to the merchant.
+2. Admin approval before showing merchant feedback to the user.
 
-Do not replace the product proposal page with the MVP console. They are intentionally separate links.
+The first merchant is:
 
-## Phase 1 MVP Console
+- Name: `天野自動車東京店`
+- Email: `smartgalilei@gmail.com`
+- Channel: email only
 
-Dependency-free local prototype for lightweight merchant outreach on used-car trade-in leads.
+## Routes
 
-## What This MVP Includes
+- `/`: public product proposal page. Keep this as the stable external-facing link.
+- `/admin`: internal admin console for lead review, merchant email approval, reply entry, and user feedback approval.
+- `/api/mcp`: ChatGPT App / MCP endpoint.
+- `/api/admin/*`: admin-only operational APIs.
+- `/api/admin/gmail/sync`: manual Gmail reply sync.
 
-- Lead intake form for used-car sell intent
-- Structured lead record view
-- Mock matching against a seeded **public contact database**
-- Auto-generated Japanese outreach drafts for:
-  - `email`
-  - `sms`
-  - `contact_form`
-  - `line`
-  - `manual`
-- Manual outreach queue with:
-  - message copy
-  - open-link
-  - mark sent
-  - mark responded
-  - quote entry
-  - response memo
-- Feedback summary (reply rate / quote stats)
-- Browser persistence via `localStorage`
+The older static files remain in the repo as references:
 
-## Local Run
+- `index.html`: original product proposal page.
+- `outreach-console.html`: earlier static Phase 1 console prototype.
+- `merchants.json`: single merchant seed list.
 
-Option A (quick): open `outreach-console.html` directly in a browser.
+## Local Development
 
-Option B (recommended): run a local static server from repo root.
+Install dependencies:
 
 ```bash
-python3 -m http.server 8080
+npm install
 ```
 
-Then open:
+Run local server:
 
-- Product proposal page: [http://localhost:8080/index.html](http://localhost:8080/index.html)
-- MVP outreach console: [http://localhost:8080/outreach-console.html](http://localhost:8080/outreach-console.html)
+```bash
+npm run dev
+```
 
-## Local Test Checklist
+Open:
 
-1. Register a lead from the intake form.
-2. Confirm matched merchants and generated channel drafts appear.
-3. Confirm queue rows are auto-created.
-4. Use `コピー` and `リンク` actions in queue rows.
-5. Mark rows as `送信済` / `返信あり`, then enter quotes/memos.
-6. Reload page and confirm state is retained.
-7. Confirm summary metrics and feedback list update.
+- Product page: [http://localhost:3000](http://localhost:3000)
+- Admin console: [http://localhost:3000/admin](http://localhost:3000/admin)
+- MCP endpoint: [http://localhost:3000/api/mcp](http://localhost:3000/api/mcp)
 
-## Scope Note (Phase 1)
+Without Supabase env vars, the app runs in memory mode. Without Gmail env vars, merchant email sending runs in safe `dry_run` mode.
 
-Real email/SMS/contact-form/LINE delivery is **not integrated** in this phase.
-Sending is mocked/manual-only through copied text and open links.
+## Environment Variables
 
-## ChatGPT App Test Path
+Copy `.env.example` to `.env.local` for local development.
 
-This prototype is intentionally static so the business loop can be tested first. To test it as a real ChatGPT App later, wrap the same lead/outreach logic behind an Apps SDK MCP server.
+Required for persistent production:
 
-Minimum MCP tools for the first ChatGPT App test:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-- `create_lead`: accept the user's used-car sell intent and return a structured lead.
-- `match_merchants`: return matched public-contact merchants for a lead.
-- `generate_outreach`: generate channel-specific Japanese outreach drafts.
-- `record_outreach_status`: mark draft/sent/responded/no_response/do_not_contact.
-- `record_quote`: save merchant response summary and quote.
+Recommended for admin access:
 
-Local ChatGPT App testing flow:
+- `ADMIN_PASSWORD`
 
-1. Build an MCP server with a public `/mcp` endpoint.
-2. Run it locally, then expose it with a tunnel such as `ngrok http <port>`.
-3. Enable ChatGPT Developer Mode.
-4. In ChatGPT, create a connector using the public `https://.../mcp` URL.
-5. Test golden prompts such as:
-   - `2019年のToyota Alphard、7万km、東京都で売りたい。買取候補を探して。`
-   - `このリード用に買取店向けメール文面を作って。`
-   - `東京クイック買取から260万円の概算返信が来たので記録して。`
-6. Verify tool calls, arguments, returned structured data, and user-facing summaries.
+Required for real Gmail sending/sync:
 
-Official OpenAI Apps SDK references:
+- `GMAIL_CLIENT_ID`
+- `GMAIL_CLIENT_SECRET`
+- `GMAIL_REFRESH_TOKEN`
 
-- Quickstart: https://developers.openai.com/apps-sdk/quickstart
-- Deploy locally with a tunnel: https://developers.openai.com/apps-sdk/deploy
-- Connect from ChatGPT: https://developers.openai.com/apps-sdk/deploy/connect-chatgpt
-- Test integration: https://developers.openai.com/apps-sdk/deploy/testing
+Email sending is hard-limited to the merchant whitelist in code: `smartgalilei@gmail.com`.
+
+## Supabase Setup
+
+1. Create a Supabase free project.
+2. Open SQL Editor.
+3. Run `supabase/migrations/001_initial.sql`.
+4. Copy project URL to `NEXT_PUBLIC_SUPABASE_URL`.
+5. Copy service role key to `SUPABASE_SERVICE_ROLE_KEY`.
+
+RLS is enabled on all MVP tables. The Vercel server uses the service role key for Phase 1 admin/MCP operations.
+
+## Vercel Setup
+
+1. Connect this GitHub repo to Vercel.
+2. Set the environment variables above.
+3. Deploy.
+4. Confirm:
+   - `/` shows the product page.
+   - `/admin` loads the admin console.
+   - `/api/mcp` returns the MCP endpoint summary.
+
+## Gmail Setup
+
+Use Gmail API OAuth credentials for the sender account.
+
+The Gmail send route:
+
+- requires admin auth,
+- only sends after clicking `Approve & Send Email`,
+- only sends to `smartgalilei@gmail.com`,
+- falls back to dry-run mode if Gmail env vars are missing.
+
+Reply sync is manual in Phase 1 through `/admin` via `Sync Gmail Replies`.
+
+## ChatGPT App / MCP Testing
+
+Use ChatGPT Developer Mode and connect the deployed HTTPS endpoint:
+
+```text
+https://your-vercel-domain.vercel.app/api/mcp
+```
+
+MCP tools:
+
+- `create_tradein_lead`
+- `get_tradein_lead_status`
+- `get_tradein_feedback`
+
+Important: MCP tools never send merchant email directly. Email can only be sent from `/admin` after human approval.
+
+Golden test:
+
+1. In ChatGPT, create a lead: `2019年 Toyota Alphard、7万km、東京都で売りたい`
+2. Confirm ChatGPT returns a `lead_id` and says admin approval is required.
+3. In `/admin`, approve and send merchant email.
+4. Register or sync a merchant reply.
+5. Approve user feedback in `/admin`.
+6. In ChatGPT, call `get_tradein_feedback` for the lead.
+
+## Tests
+
+Static smoke test:
+
+```bash
+npm test
+```
+
+Type/build checks:
+
+```bash
+npm run typecheck
+npm run build
+```
