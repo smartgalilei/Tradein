@@ -21,8 +21,23 @@ const tools = [
       properties: {
         app_user_key: { type: "string" },
         customer_name: { type: "string" },
-        customer_contact: { type: "string" },
-        preferred_contact: { type: "string" },
+        customer_contact: {
+          type: "string",
+          description:
+            "All user-approved contact details to share with the merchant, including phone numbers and email addresses."
+        },
+        customer_email: {
+          type: "string",
+          description: "User-approved email address to share with the merchant."
+        },
+        customer_phone: {
+          type: "string",
+          description: "User-approved phone number to share with the merchant."
+        },
+        preferred_contact: {
+          type: "string",
+          description: "Preferred contact method, for example email or phone."
+        },
         vehicle: {
           type: "object",
           properties: {
@@ -116,7 +131,7 @@ async function handleJsonRpc(request: JsonRpcRequest) {
         const created = await createLead({
           app_user_key: String(args.app_user_key || "chatgpt-anonymous"),
           customer_name: optionalString(args.customer_name),
-          customer_contact: optionalString(args.customer_contact),
+          customer_contact: buildCustomerContact(args),
           preferred_contact: optionalString(args.preferred_contact),
           vehicle: (args.vehicle || {}) as Record<string, unknown>,
           location: (args.location || {}) as { prefecture: string; city?: string },
@@ -204,6 +219,15 @@ function optionalString(value: unknown) {
 function optionalNumber(value: unknown) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function buildCustomerContact(args: Record<string, unknown>) {
+  const contact = optionalString(args.customer_contact);
+  const email = optionalString(args.customer_email);
+  const phone = optionalString(args.customer_phone);
+  const parts = [contact, email, phone].filter(Boolean) as string[];
+  if (!parts.length) return undefined;
+  return Array.from(new Set(parts)).join(" / ");
 }
 
 function statusText(status: string) {

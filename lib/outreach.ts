@@ -24,6 +24,7 @@ export function generateOutreachMessage(
     Lead,
     | "id"
     | "customer_name"
+    | "customer_contact"
     | "preferred_contact"
     | "vehicle"
     | "location"
@@ -48,6 +49,7 @@ export function generateOutreachMessage(
       (lead.customer_name || "ChatGPTユーザー") +
       " / 希望連絡: " +
       (lead.preferred_contact || "未確認"),
+    "【連絡先】" + formatCustomerContact(lead.customer_contact),
     "【車両】" +
       lead.vehicle.year +
       "年 " +
@@ -80,6 +82,11 @@ export function generateOutreachMessage(
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function formatCustomerContact(contact?: string) {
+  const trimmed = contact?.trim();
+  return trimmed || "未共有";
 }
 
 export function parseQuoteManYen(text: string) {
