@@ -24,7 +24,6 @@ export function generateOutreachMessage(
     Lead,
     | "id"
     | "customer_name"
-    | "customer_contact"
     | "preferred_contact"
     | "vehicle"
     | "location"
@@ -49,7 +48,6 @@ export function generateOutreachMessage(
       (lead.customer_name || "ChatGPTユーザー") +
       " / 希望連絡: " +
       (lead.preferred_contact || "未確認"),
-    "【連絡先】" + formatCustomerContact(lead.customer_contact),
     "【車両】" +
       lead.vehicle.year +
       "年 " +
@@ -84,9 +82,66 @@ export function generateOutreachMessage(
     .join("\n");
 }
 
-function formatCustomerContact(contact?: string) {
-  const trimmed = contact?.trim();
-  return trimmed || "未共有";
+export function generateContactShareSubject(lead: Pick<Lead, "vehicle">) {
+  return `査定希望者の連絡先共有｜${lead.vehicle.year} ${lead.vehicle.make} ${lead.vehicle.model}`;
+}
+
+export function generateContactShareMessage(
+  lead: Pick<
+    Lead,
+    | "id"
+    | "customer_name"
+    | "customer_contact"
+    | "preferred_contact"
+    | "vehicle"
+    | "location"
+    | "sell_by"
+    | "notes"
+  >,
+  merchant: Merchant = SINGLE_MERCHANT
+) {
+  return [
+    `${merchant.name} ご担当者様`,
+    "",
+    "Tradein事務局です。",
+    "査定結果を確認した売却希望者が、次のステップへ進むことを希望しています。",
+    "下記連絡先へご対応をお願いいたします。",
+    "",
+    "【リードID】" + lead.id,
+    "【ユーザー】" +
+      (lead.customer_name || "ChatGPTユーザー") +
+      " / 希望連絡: " +
+      (lead.preferred_contact || "未確認"),
+    "【連絡先】" + (lead.customer_contact || "未共有"),
+    "【車両】" +
+      lead.vehicle.year +
+      "年 " +
+      lead.vehicle.make +
+      " " +
+      lead.vehicle.model +
+      " (" +
+      (lead.vehicle.category || "中古車") +
+      ")",
+    "【状態】走行 " +
+      lead.vehicle.mileage_km.toLocaleString("ja-JP") +
+      "km / 修復歴 " +
+      (lead.vehicle.accident_history || "未確認") +
+      " / " +
+      (lead.vehicle.condition || "通常"),
+    "【地域】" +
+      lead.location.prefecture +
+      (lead.location.city ? " " + lead.location.city : ""),
+    "【売却時期】" + (lead.sell_by || "未定"),
+    lead.notes ? "【補足】" + lead.notes : "",
+    "",
+    "現車確認や追加情報の確認について、売却希望者へ直接ご連絡ください。",
+    "",
+    "よろしくお願いいたします。",
+    "",
+    "Tradein"
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function parseQuoteManYen(text: string) {

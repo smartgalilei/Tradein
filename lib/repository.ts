@@ -1,6 +1,12 @@
 import { randomUUID } from "crypto";
 import { SINGLE_MERCHANT } from "./constants";
-import { generateOutreachMessage, generateOutreachSubject, normalizeVehicle } from "./outreach";
+import {
+  generateContactShareMessage,
+  generateContactShareSubject,
+  generateOutreachMessage,
+  generateOutreachSubject,
+  normalizeVehicle
+} from "./outreach";
 import { getSupabase, hasSupabaseConfig } from "./supabase";
 import type {
   AdminOverview,
@@ -25,6 +31,14 @@ type CreateLeadInput = {
   };
   desired_price_man_yen?: number | null;
   sell_by?: string;
+  notes?: string;
+};
+
+type ShareContactInput = {
+  lead_id: string;
+  app_user_key?: string;
+  customer_contact: string;
+  preferred_contact?: string;
   notes?: string;
 };
 
@@ -122,6 +136,90 @@ export async function createLead(input: CreateLeadInput) {
     memoryStore.leads.unshift(lead);
     memoryStore.outreachAttempts.unshift(outreach);
     memoryStore.auditEvents.unshift({ type: "lead_created", leadId: lead.id, at: now });
+  }
+
+  return { lead, outreach };
+}
+
+export async function queueContactShare(input: ShareContactInput) {
+  const now = new Date().toISOString();
+  const overview = await getOverview();
+  const existing = overview.leads.find(
+    (candidate) =>
+      candidate.id === input.lead_id &&
+      (!input.app_user_key ||
+        candidate.app_user_key === input.app_user_key ||
+        input.app_user_key === "admin" ||
+        input.app_user_key === "chatgpt-anonymous")
+  );
+  if (!existing) throw new Error("Lead not found");
+  if (!input.customer_contact.trim()) throw new Error("Customer contact is required");
+
+  const lead: Lead = {
+    ...existing,
+    customer_contact: input.customer_contact.trim(),
+    preferred_contact: input.preferred_contact || existing.preferred_contact || "未確認",
+    notes: [existing.notes, input.notes].filter(Boolean).join("\n"),
+    updated_at: now
+  };
+  const outreach: OutreachAttempt = {
+    id: randomUUID(),
+    lead_id: lead.id,
+    merchant_id: SINGLE_MERCHANT.id,
+    channel: "email",
+    destination: SINGLE_MERCHANT.public_email,
+    generated_subject: generateContactShareSubject(lead),
+    generated_message: generateContactShareMessage(lead, SINGLE_MERCHANT),
+    status: "pending_approval",
+    gmail_message_id: null,
+    sent_at: null,
+    created_at: now,
+    updated_at: now
+  };
+
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error: leadError } = await supabase
+      .from("leads")
+      .update({
+        customer_contact: lead.customer_contact,
+        preferred_contact: lead.preferred_contact,
+        notes: lead.notes,
+        updated_at: now
+      })
+      .eq("id", lead.id);
+    if (leadError) throw leadError;
+
+    const { error: outreachError } = await supabase
+      .from("outreach_attempts")
+      .insert({
+        id: outreach.id,
+        lead_id: outreach.lead_id,
+        merchant_id: outreach.merchant_id,
+        channel: outreach.channel,
+        destination: outreach.destination,
+        generated_subject: outreach.generated_subject,
+        generated_message: outreach.generated_message,
+        status: outreach.status
+      });
+    if (outreachError) throw outreachError;
+
+    await audit("contact_share_queued", lead.id, { outreach_id: outreach.id });
+  } else {
+    const memoryLead = memoryStore.leads.find((item) => item.id === lead.id);
+    if (memoryLead) {
+      memoryLead.customer_contact = lead.customer_contact;
+      memoryLead.preferred_contact = lead.preferred_contact;
+      memoryLead.notes = lead.notes;
+      memoryLead.updated_at = now;
+    }
+    memoryStore.outreachAttempts.unshift(outreach);
+    memoryStore.auditEvents.unshift({
+      type: "contact_share_queued",
+      leadId: lead.id,
+      outreachId: outreach.id,
+      at: now
+    });
   }
 
   return { lead, outreach };

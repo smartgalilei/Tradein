@@ -22,9 +22,14 @@ assert(merchant.public_email === "smartgalilei@gmail.com", "merchant email is wh
 
 const mcp = readFileSync("app/api/mcp/route.ts", "utf8");
 assert(mcp.includes("create_tradein_lead"), "MCP create tool exists");
+assert(mcp.includes("share_tradein_contact"), "MCP contact-share tool exists");
 assert(mcp.includes("get_tradein_lead_status"), "MCP status tool exists");
 assert(mcp.includes("get_tradein_feedback"), "MCP feedback tool exists");
 assert(!mcp.includes("sendMerchantEmail"), "MCP route does not send merchant email");
+assert(
+  mcp.includes("Do not ask for or share the user's phone/email at this stage"),
+  "initial lead tool does not request contact details"
+);
 
 const adminSend = readFileSync("app/api/admin/outreach/[id]/send/route.ts", "utf8");
 assert(adminSend.includes("assertAdmin"), "admin send route requires admin auth");

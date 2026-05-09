@@ -1,5 +1,10 @@
 import { NextRequest } from "next/server";
-import { createLead, getApprovedFeedback, getLeadStatus } from "../../../lib/repository";
+import {
+  createLead,
+  getApprovedFeedback,
+  getLeadStatus,
+  queueContactShare
+} from "../../../lib/repository";
 
 type JsonRpcRequest = {
   jsonrpc?: string;
@@ -15,29 +20,12 @@ const tools = [
   {
     name: "create_tradein_lead",
     description:
-      "Create a used-car trade-in lead. This queues a merchant email draft for admin approval but never sends email directly.",
+      "Create an initial used-car trade-in lead from vehicle and sale details only. Do not ask for or share the user's phone/email at this stage. This queues a merchant quote request for admin approval but never sends email directly.",
     inputSchema: {
       type: "object",
       properties: {
         app_user_key: { type: "string" },
         customer_name: { type: "string" },
-        customer_contact: {
-          type: "string",
-          description:
-            "All user-approved contact details to share with the merchant, including phone numbers and email addresses."
-        },
-        customer_email: {
-          type: "string",
-          description: "User-approved email address to share with the merchant."
-        },
-        customer_phone: {
-          type: "string",
-          description: "User-approved phone number to share with the merchant."
-        },
-        preferred_contact: {
-          type: "string",
-          description: "Preferred contact method, for example email or phone."
-        },
         vehicle: {
           type: "object",
           properties: {
@@ -65,6 +53,40 @@ const tools = [
         notes: { type: "string" }
       },
       required: ["vehicle", "location"]
+    }
+  },
+  {
+    name: "share_tradein_contact",
+    description:
+      "After approved merchant feedback has been shown and the user explicitly agrees to proceed, queue the user's contact details to be shared with the merchant. This requires admin approval and never sends email directly.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        lead_id: { type: "string" },
+        app_user_key: { type: "string" },
+        customer_contact: {
+          type: "string",
+          description:
+            "User-approved contact details to share with the merchant, such as phone number and/or email."
+        },
+        customer_email: {
+          type: "string",
+          description: "User-approved email address to share with the merchant."
+        },
+        customer_phone: {
+          type: "string",
+          description: "User-approved phone number to share with the merchant."
+        },
+        preferred_contact: {
+          type: "string",
+          description: "Preferred contact method, for example email or phone."
+        },
+        notes: {
+          type: "string",
+          description: "Optional context about the user's consent or preferred next step."
+        }
+      },
+      required: ["lead_id"]
     }
   },
   {
@@ -131,8 +153,8 @@ async function handleJsonRpc(request: JsonRpcRequest) {
         const created = await createLead({
           app_user_key: String(args.app_user_key || "chatgpt-anonymous"),
           customer_name: optionalString(args.customer_name),
-          customer_contact: buildCustomerContact(args),
-          preferred_contact: optionalString(args.preferred_contact),
+          customer_contact: undefined,
+          preferred_contact: "ChatGPT",
           vehicle: (args.vehicle || {}) as Record<string, unknown>,
           location: (args.location || {}) as { prefecture: string; city?: string },
           desired_price_man_yen: optionalNumber(args.desired_price_man_yen),
@@ -152,6 +174,31 @@ async function handleJsonRpc(request: JsonRpcRequest) {
             status: created.lead.status,
             merchant_email_requires_admin_approval: true,
             user_feedback_requires_admin_approval: true
+          }
+        });
+      }
+
+      if (name === "share_tradein_contact") {
+        const queued = await queueContactShare({
+          lead_id: String(args.lead_id || ""),
+          app_user_key: optionalString(args.app_user_key),
+          customer_contact: buildCustomerContact(args) || "",
+          preferred_contact: optionalString(args.preferred_contact),
+          notes: optionalString(args.notes)
+        });
+        return result(request.id, {
+          content: [
+            {
+              type: "text",
+              text:
+                "連絡先共有の準備を開始しました。管理者が内容を確認してから天野自動車東京店へメール送信します。"
+            }
+          ],
+          structuredContent: {
+            lead_id: queued.lead.id,
+            outreach_id: queued.outreach.id,
+            outreach_status: queued.outreach.status,
+            merchant_email_requires_admin_approval: true
           }
         });
       }
