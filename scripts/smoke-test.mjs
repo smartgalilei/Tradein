@@ -4,6 +4,7 @@ const files = [
   "app/page.tsx",
   "app/admin/AdminConsole.tsx",
   "app/api/mcp/route.ts",
+  "app/api/cron/keepalive/route.ts",
   "app/api/admin/outreach/[id]/send/route.ts",
   "lib/gmail.ts",
   "lib/repository.ts",
@@ -34,6 +35,10 @@ assert(
 const adminSend = readFileSync("app/api/admin/outreach/[id]/send/route.ts", "utf8");
 assert(adminSend.includes("assertAdmin"), "admin send route requires admin auth");
 assert(adminSend.includes("sendMerchantEmail"), "admin send route uses Gmail send service");
+
+const keepalive = readFileSync("app/api/cron/keepalive/route.ts", "utf8");
+assert(keepalive.includes("CRON_SECRET"), "cron keepalive checks CRON_SECRET");
+assert(keepalive.includes("cron_keepalive"), "cron keepalive writes an audit marker");
 
 const gmail = readFileSync("lib/gmail.ts", "utf8");
 assert(gmail.includes("MERCHANT_EMAIL_WHITELIST"), "Gmail send enforces whitelist");
